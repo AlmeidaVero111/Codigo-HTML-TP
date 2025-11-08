@@ -2,161 +2,1599 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Interfaces Lab - Nivel Básico</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Laboratorio Clínico</title>
+    <!-- Script de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fuentes de Google: Orbitron (tech) e Inter (limpia) -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Asignamos las fuentes */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+        /* Ocultamos las secciones de la app por defecto */
+        .seccion-app {
+            display: none;
+        }
+        /* Fondo de colmena para el Dashboard */
+        .dashboard-bg {
+            background-image: linear-gradient(rgba(249, 250, 251, 0.95), rgba(249, 250, 251, 0.95)), url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMCIgaGVpZ2h0PSIzMCI+CjxyZWN0IHdpZHRoPSIzMCIgaGVpZ2h0PSIzMCIgZmlsbD0iI0ZGRENEMCI+PC9yZWN0Pgo8ZyBmaWxsPSIjRkZGRkZGIj4KPHBvbHlnb24gcG9pbnRzPSIwLDAgMzAsMCAzMCwzMCAwLDMwIi8+CjwvZz4KPC9zdmc+');
+            background-image: 
+                linear-gradient(rgba(249, 250, 251, 0.97), rgba(249, 250, 251, 0.97)),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpolygon fill='%23dc2626' fill-opacity='0.05' points='120 0 120 60 60 120 0 60 0 0 60 60 120 0'%3E%3C/polygon%3E%3C/svg%3E");
+            background-size: auto;
+            background-color: #f9fafb; /* Color de fondo de reserva (gray-50) */
+        }
+
+        /* Estilos para Notificaciones "Toast" */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .toast {
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            color: white;
+            font-weight: 600;
+            opacity: 0;
+            transform: translateX(100%);
+            animation: slideIn 0.5s forwards, fadeOut 0.5s forwards 3s;
+        }
+        .toast.exito { background-color: #10B981; /* green-500 */ }
+        .toast.error { background-color: #EF4444; /* red-500 */ }
+        .toast.info { background-color: #3B82F6; /* blue-500 */ }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        /* Estilos para la prosa (textos largos) */
+        .prose p { margin-bottom: 1rem; }
+        .prose h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+        .prose ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
+
+        /* Estilos para campos readonly */
+        input:read-only, select:disabled {
+            background-color: #f3f4f6; /* bg-gray-100 */
+            cursor: not-allowed;
+        }
+
+    </style>
 </head>
-<body>
+<body class="bg-gray-100 flex flex-col min-h-screen">
 
-    <!-- TÍTULO PRINCIPAL -->
-    <h1>Sistema de Laboratorio de Análisis Clínicos</h1>
-    <hr>
+    <!-- Contenedor de Notificaciones -->
+    <div id="toast-container"></div>
 
-    <!-- ==================================================================================== -->
-    <!-- 1. FORMULARIO DE CARGA DE INFORME -->
-    <!-- Etiquetas clave: form, h2, label, input, button -->
-    <!-- ==================================================================================== -->
-    <h2>1. Formulario de Carga de Nuevo Informe (Borrador)</h2>
-    <form action="#" method="POST">
-        
-        <!-- DATOS DEL PACIENTE -->
-        <h3>Datos del Paciente</h3>
-        <label for="dni">DNI:</label>
-        <input type="text" id="dni" required><br>
-
-        <label for="paciente_nombre">Nombre y Apellido:</label>
-        <input type="text" id="paciente_nombre" required><br>
-
-        <label for="paciente_os">Obra Social Primaria:</label>
-        <input type="text" id="paciente_os"><br>
-        <p>... más datos del paciente (fecha nacimiento, contacto, etc.)</p>
-
-        <!-- DATOS DEL MÉDICO SOLICITANTE -->
-        <h3>Datos del Médico Solicitante</h3>
-        <label for="solicitante_mp">Matrícula Profesional (MP):</label>
-        <input type="text" id="solicitante_mp" required><br>
-
-        <label for="solicitante_nombre">Institución/Procedencia:</label>
-        <input type="text" id="solicitante_nombre"><br>
-        
-        <!-- PRÁCTICAS SOLICITADAS (Tabla para estructura de detalle) -->
-        <h3>Prácticas Solicitadas</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Código Nomenclador</th>
-                    <th>Descripción</th>
-                    <th>Muestra Remitida</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <!-- Campos vacíos listos para la entrada de datos -->
-                    <td><input type="text"></td>
-                    <td><input type="text"></td>
-                    <td><input type="text"></td>
-                </tr>
-            </tbody>
-        </table>
-
-        <p style="color: red;">Estado Inicial: Borrador</p>
-        <button type="submit">Guardar Informe</button>
-    </form>
-    <hr>
-
-
-    <!-- ==================================================================================== -->
-    <!-- 2. PANTALLA DE BÚSQUEDA -->
-    <!-- Etiquetas clave: h2, form, label, select, table -->
-    <!-- ==================================================================================== -->
-    <h2>2. Pantalla de Búsqueda de Informes</h2>
-    <form action="#" method="GET">
-        <h3>Criterios de Búsqueda</h3>
-        <label for="search_nro">N° de Informe:</label>
-        <input type="text" id="search_nro"><br>
-
-        <label for="search_estado">Estado:</label>
-        <select id="search_estado">
-            <option value="revision">En Revisión Profesional</option>
-            <option value="borrador">Borrador</option>
-        </select><br>
-        
-        <button type="submit">Buscar</button>
-    </form>
-
-    <h3>Resultados de la Búsqueda</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>N° Informe</th>
-                <th>Paciente</th>
-                <th>Estado</th>
-                <th>Acción</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <!-- Fila de ejemplo vacía para mostrar la estructura -->
-                <td>_________</td>
-                <td>_________</td>
-                <td>_________</td>
-                <td><a href="#">Abrir</a></td>
-            </tr>
-        </tbody>
-    </table>
-    <hr>
-
-
-    <!-- ==================================================================================== -->
-    <!-- 3. INFORME POR PANTALLA (VISTA DETALLE) -->
-    <!-- Se usa "______" para simular la línea punteada en datos estáticos -->
-    <!-- ==================================================================================== -->
-    <h2>3. Vista Detalle del Informe Bioquímico</h2>
-    
-    <!-- ENCABEZADO FIJO -->
-    <header>
-        <img src="logo_lab.png" alt="Logotipo del Laboratorio Central BIOQUIMICO" style="max-width: 150px; margin-bottom: 10px;">
-        <h3>LABORATORIO CENTRAL BIOQUIMICO</h3>
-        <p>Domicilio: ________________ | Contacto: ________________</p>
+    <!-- BARRA DE NAVEGACIÓN SUPERIOR FIJA -->
+    <header class="bg-black shadow-md">
+        <nav class="container mx-auto px-6 py-6 flex justify-between items-center">
+            
+            <!-- Logo y Título -->
+            <div class="flex items-center space-x-4">
+                <!-- LOGO SVG DIBUJADO (más grande: h-16 w-16) -->
+                <svg class="h-16 w-16" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <polygon points="50,50 50,0 85,15" fill="#E53E3E" />
+                    <polygon points="50,50 85,15 100,50" fill="white" />
+                    <polygon points="50,50 100,50 85,85" fill="#E53E3E" />
+                    <polygon points="50,50 85,85 50,100" fill="white" />
+                    <polygon points="50,50 50,100 15,85" fill="#E53E3E" />
+                    <polygon points="50,50 15,85 0,50" fill="white" />
+                    <polygon points="50,50 0,50 15,15" fill="#E53E3E" />
+                    <polygon points="50,50 15,15 50,0" fill="white" />
+                </svg>
+                <div>
+                    <!-- Texto más chico: text-2xl y text-sm -->
+                    <h1 class="text-2xl font-bold text-white uppercase font-orbitron">
+                        Umbrella Corporation
+                    </h1>
+                    <p class="text-sm font-semibold text-red-600">División Laboratorio</p>
+                </div>
+            </div>
+            
+            <!-- Botones de Navegación -->
+            <div class="space-x-4">
+                <button onclick="mostrarSeccion('seccion-dashboard')" class="text-gray-300 hover:text-white font-semibold px-4 py-2 transition-colors">
+                    Inicio
+                </button>
+                <button onclick="mostrarSeccion('seccion-nosotros-placeholder')" class="text-gray-300 hover:text-white font-semibold px-4 py-2 transition-colors">
+                    Nosotros
+                </button>
+                <!-- BOTÓN "NOVEDADES" AÑADIDO -->
+                <button onclick="mostrarSeccion('seccion-novedades')" class="text-gray-300 hover:text-white font-semibold px-4 py-2 transition-colors">
+                    Novedades
+                </button>
+                <button onclick="mostrarSeccion('seccion-faq')" class="text-gray-300 hover:text-white font-semibold px-4 py-2 transition-colors">
+                    Preguntas Frecuentes
+                </button>
+                <button id="open-login-button" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg shadow">
+                    Iniciar Sesión
+                </button>
+            </div>
+        </nav>
     </header>
-    
-    <!-- ENCABEZADO VARIABLE (MAESTRO) -->
-    <section>
-        <h4>Datos del Informe</h4>
-        <p><strong>N° Informe:</strong> ________ | <strong>Estado:</strong> ________</p>
-        <p><strong>Paciente:</strong> ________ | <strong>DNI:</strong> ________ | <strong>Edad:</strong> ________</p>
-        <p><strong>Profesional Lab:</strong> ________ | <strong>Solicitante:</strong> ________</p>
-    </section>
 
-    <!-- DETALLE DEL INFORME (Tabla de resultados con placeholders) -->
-    <section>
-        <h4>Detalle de Prácticas y Resultados</h4>
-        <table>
-            <thead>
-                <tr>
-                    <th>Muestra</th>
-                    <th>Estudio</th>
-                    <th>Valor Encontrado</th>
-                    <th>Valor de Referencia</th>
-                    <th>Observaciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>_________</td>
-                    <td>_________</td>
-                    <td>_________</td>
-                    <td>_________</td>
-                    <td>_________</td>
-                </tr>
-            </tbody>
-        </table>
-    </section>
+    <!-- CONTENIDO PRINCIPAL DE LA APLICACIÓN -->
+    <main class="w-full max-w-7xl mx-auto p-6 flex-grow">
 
-    <!-- PIE DE INFORME -->
-    <footer>
-        <p style="text-align: right;">Generado: ________ | Página ________ de ________</p>
+        <!-- ==================================================================================== -->
+        <!-- 1. PANEL DE CONTROL (DASHBOARD) -->
+        <!-- ==================================================================================== -->
+        <section id="seccion-dashboard" class="seccion-app dashboard-bg" style="display: block;">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6">Panel de Control</h2>
+            <!-- Ajustado a md:grid-cols-2 para un layout 2x2 en pantallas medianas y grandes -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- Tarjeta: Cargar Informe -->
+                <div onclick="mostrarSeccion('seccion-carga')" class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer border border-gray-200">
+                    <svg class="w-12 h-12 text-red-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2z"></path></svg>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Cargar Nuevo Informe</h3>
+                    <p class="text-gray-600">Iniciar un nuevo informe de paciente en estado "Borrador".</p>
+                </div>
+
+                <!-- Tarjeta: Buscar Informes -->
+                <div onclick="mostrarSeccion('seccion-busqueda')" class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer border border-gray-200">
+                    <svg class="w-12 h-12 text-gray-700 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Buscar Informes</h3>
+                    <p class="text-gray-600">Buscar, filtrar y gestionar informes existentes (en revisión, publicados, etc.).</p>
+                </div>
+
+                <!-- Tarjeta: Ver Nomenclador -->
+                <div onclick="mostrarSeccion('seccion-nomenclador')" class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer border border-gray-200">
+                    <svg class="w-12 h-12 text-gray-700 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002-2h2a2 2 0 002 2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Ver Nomenclador</h3>
+                    <p class="text-gray-600">Consultar la lista de estudios, códigos nacionales y requisitos.</p>
+                </div>
+
+                <!-- Tarjeta: "Tu Opinión Suma" -->
+                <div onclick="mostrarSeccion('seccion-opiniones')" class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer border border-gray-200">
+                    <!-- Icono de Estrella -->
+                    <svg class="w-12 h-12 text-yellow-500 mb-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Tu Opinión Suma</h3>
+                    <p class="text-gray-600">Ver la lista de opiniones y valoraciones de 0 a 5 estrellas.</p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ==================================================================================== -->
+        <!-- 2. FORMULARIO DE CARGA DE INFORME (MODIFICADO v3) -->
+        <!-- ==================================================================================== -->
+        <section id="seccion-carga" class="seccion-app bg-white p-8 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6">1. Formulario de Carga de Nuevo Informe (Borrador)</h2>
+            <form id="form-carga-informe" action="#" method="POST">
+                
+                <!-- Datos del Paciente -->
+                <div class="border-b border-gray-200 pb-6 mb-6">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-4">Datos del Paciente</h3>
+                    
+                    <!-- Búsqueda -->
+                    <div class="flex items-end space-x-4 mb-6">
+                        <div class="flex-grow">
+                            <label for="dni_search" class="block text-sm font-medium text-gray-700 mb-1">Buscar DNI Paciente:</label>
+                            <input type="text" id="dni_search" placeholder="Ingrese DNI (ej: 123456 para simular 'Encontrado')" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                        </div>
+                        <button type="button" id="btn_buscar_paciente" class="bg-gray-700 hover:bg-gray-800 text-white font-semibold px-4 py-2 rounded-lg shadow">Buscar</button>
+                    </div>
+
+                    <!-- Campos (deshabilitados al inicio) -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label for="paciente_nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre y Apellido:</label>
+                            <input type="text" id="paciente_nombre" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm" readonly>
+                        </div>
+                        <div>
+                            <label for="paciente_nacimiento" class="block text-sm font-medium text-gray-700 mb-1">Fecha de Nacimiento:</label>
+                            <input type="date" id="paciente_nacimiento" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm" readonly>
+                        </div>
+                        <div>
+                            <label for="paciente_genero" class="block text-sm font-medium text-gray-700 mb-1">Género:</label>
+                            <select id="paciente_genero" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm" disabled>
+                                <option value="">Seleccionar...</option>
+                                <option value="masculino">Masculino</option>
+                                <option value="femenino">Femenino</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="paciente_celular" class="block text-sm font-medium text-gray-700 mb-1">Celular:</label>
+                            <input type="tel" id="paciente_celular" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm" readonly>
+                        </div>
+                        <div>
+                            <label for="paciente_email" class="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico:</label>
+                            <input type="email" id="paciente_email" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm" readonly>
+                        </div>
+                        <div>
+                            <label for="paciente_os" class="block text-sm font-medium text-gray-700 mb-1">Obra Social Primaria:</label>
+                            <input type="text" id="paciente_os" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm" readonly>
+                        </div>
+                        <div class="md:col-span-1">
+                            <label for="paciente_os_sec" class="block text-sm font-medium text-gray-700 mb-1">Obra Social Secundaria (Opc):</label>
+                            <input type="text" id="paciente_os_sec" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Datos del Médico Solicitante (MODIFICADO v3) -->
+                <div class="border-b border-gray-200 pb-6 mb-6">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-4">Datos del Médico Solicitante</h3>
+                    
+                    <!-- Búsqueda de Médico -->
+                    <div class="flex items-end space-x-4 mb-6">
+                        <div class="flex-grow">
+                            <label for="medico_mp_search" class="block text-sm font-medium text-gray-700 mb-1">Buscar Matrícula (MP):</label>
+                            <input type="text" id="medico_mp_search" placeholder="Ingrese MP (ej: MP123 para simular 'Encontrado')" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                        </div>
+                        <button type="button" id="btn_buscar_medico" class="bg-gray-700 hover:bg-gray-800 text-white font-semibold px-4 py-2 rounded-lg shadow">Buscar</button>
+                    </div>
+                    
+                    <!-- Campos de Médico -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="solicitante_nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre y Apellido:</label>
+                            <input type="text" id="solicitante_nombre" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm" readonly>
+                        </div>
+                        <div>
+                            <label for="solicitante_especialidad" class="block text-sm font-medium text-gray-700 mb-1">Especialidad:</label>
+                            <input type="text" id="solicitante_especialidad" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm" readonly>
+                        </div>
+                        <div>
+                            <label for="solicitante_celular" class="block text-sm font-medium text-gray-700 mb-1">Celular (Contacto):</label>
+                            <input type="tel" id="solicitante_celular" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm" readonly>
+                        </div>
+                        <div>
+                            <label for="solicitante_email" class="block text-sm font-medium text-gray-700 mb-1">Email (Contacto):</label>
+                            <input type="email" id="solicitante_email" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm" readonly>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="solicitante_institucion" class="block text-sm font-medium text-gray-700 mb-1">Institución/Procedencia:</label>
+                            <input type="text" id="solicitante_institucion" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm" readonly>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Datos Administrativos -->
+                <div class="border-b border-gray-200 pb-6 mb-6">
+                     <h3 class="text-xl font-semibold text-gray-700 mb-4">Datos Administrativos</h3>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="fecha_recepcion" class="block text-sm font-medium text-gray-700 mb-1">Fecha de Recepción:</label>
+                            <input type="date" id="fecha_recepcion" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                        </div>
+                         <div>
+                            <label for="asignar_profesional" class="block text-sm font-medium text-gray-700 mb-1">Asignar a Profesional (Laboratorio):</label>
+                            <select id="asignar_profesional" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                                <option value="">Seleccionar Bioquímico...</option>
+                                <option value="MP 54321">Dra. Ana Méndez (MP 54321)</option>
+                                <option value="MP 11223">Dr. Luis Costa (MP 11223)</option>
+                                <option value="MP 99887">Lic. Albert Wesker (MP 99887)</option>
+                            </select>
+                        </div>
+                     </div>
+                </div>
+
+                <!-- Prácticas Solicitadas -->
+                <div class="mb-6">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-4">Prácticas Solicitadas</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white border border-gray-300">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="py-2 px-4 border-b text-left text-sm font-medium text-gray-600">Código Nomenclador</th>
+                                    <th class="py-2 px-4 border-b text-left text-sm font-medium text-gray-600">Descripción</th>
+                                    <th class="py-2 px-4 border-b text-left text-sm font-medium text-gray-600">Muestra Remitida</th>
+                                    <th class="py-2 px-4 border-b text-left text-sm font-medium text-gray-600">Breve Descripción (Opc)</th>
+                                    <!-- AÑADIDO (v5): w-16 para ajustar ancho -->
+                                    <th class="py-2 px-4 border-b text-left text-sm font-medium text-gray-600 w-16">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-practicas-body">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="py-2 px-4 border-b"><input type="text" placeholder="Código" class="w-full px-2 py-1 border border-gray-300 rounded-md"></td>
+                                    <td class="py-2 px-4 border-b"><input type="text" placeholder="Descripción" class="w-full px-2 py-1 border border-gray-300 rounded-md"></td>
+                                    <td class="py-2 px-4 border-b"><input type="text" placeholder="Muestra" class="w-full px-2 py-1 border border-gray-300 rounded-md"></td>
+                                    <td class="py-2 px-4 border-b"><input type="text" placeholder="Comentario..." class="w-full px-2 py-1 border border-gray-300 rounded-md"></td>
+                                    <td class="py-2 px-4 border-b text-center">
+                                        <button type="button" onclick="eliminarFila(this)" class="bg-red-500 hover:bg-red-600 text-white font-bold px-3 py-1 text-xs rounded-full shadow-md">X</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Botón para añadir fila -->
+                    <button type="button" id="btn-anadir-practica" class="mt-4 bg-gray-700 hover:bg-gray-800 text-white font-semibold px-4 py-2 rounded-lg shadow-md text-sm">
+                        + Añadir Práctica
+                    </button>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <p class="text-lg font-semibold text-red-600">Estado Inicial: Borrador</p>
+                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2 rounded-lg shadow-md transition-colors">
+                        Guardar Informe
+                    </button>
+                </div>
+            </form>
+        </section>
+
+
+        <!-- ==================================================================================== -->
+        <!-- 3. PANTALLA DE BÚSQUEDA (MODIFICADA v3) -->
+        <!-- ==================================================================================== -->
+        <section id="seccion-busqueda" class="seccion-app">
+            
+            <!-- Formulario de Búsqueda -->
+            <div class="bg-white p-8 rounded-lg shadow-md mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6">2. Pantalla de Búsqueda de Informes</h2>
+                <!-- Formulario de búsqueda más completo -->
+                <form action="#" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+                    
+                    <div>
+                        <label for="search_nro" class="block text-sm font-medium text-gray-700 mb-1">N° de Informe:</label>
+                        <input type="text" id="search_nro" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    
+                    <div>
+                        <label for="search_paciente" class="block text-sm font-medium text-gray-700 mb-1">DNI o Paciente:</label>
+                        <input type="text" id="search_paciente" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+
+                    <div>
+                        <label for="search_solicitante" class="block text-sm font-medium text-gray-700 mb-1">Médico Solicitante:</label>
+                        <input type="text" id="search_solicitante" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    
+                    <div>
+                        <label for="search_estado" class="block text-sm font-medium text-gray-700 mb-1">Estado:</label>
+                        <select id="search_estado" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                            <option value="todos">Todos los Estados</option>
+                            <option value="revision">En Revisión Profesional</option>
+                            <option value="borrador">Borrador</option>
+                            <option value="publicado">Publicado</option>
+                            <option value="entregado">Entregado</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="search_prof_lab" class="block text-sm font-medium text-gray-700 mb-1">Prof. Laboratorio:</label>
+                        <select id="search_prof_lab" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                            <option value="todos">Todos</option>
+                            <option value="MP 54321">Dra. Ana Méndez (MP 54321)</option>
+                            <option value="MP 11223">Dr. Luis Costa (MP 11223)</option>
+                            <option value="MP 99887">Lic. Albert Wesker (MP 99887)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="search_os" class="block text-sm font-medium text-gray-700 mb-1">Obra Social:</label>
+                        <input type="text" id="search_os" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+
+                    <div>
+                        <label for="search_fecha_desde" class="block text-sm font-medium text-gray-700 mb-1">Fecha Desde:</label>
+                        <input type="date" id="search_fecha_desde" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+
+                    <div>
+                        <label for="search_fecha_hasta" class="block text-sm font-medium text-gray-700 mb-1">Fecha Hasta:</label>
+                        <input type="date" id="search_fecha_hasta" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    
+                    <!-- Botón de búsqueda -->
+                    <div class="col-span-1 md:col-span-4 flex justify-end">
+                        <button type="submit" class="bg-gray-700 hover:bg-gray-800 text-white font-bold px-6 py-2 rounded-lg shadow-md transition-colors w-full md:w-auto">
+                            Buscar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Tabla de Resultados -->
+            <div class="bg-white p-8 rounded-lg shadow-md overflow-x-auto">
+                <h3 class="text-xl font-semibold text-gray-700 mb-4">Resultados de la Búsqueda</h3>
+                <table class="min-w-full bg-white border border-gray-300">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="py-3 px-4 border-b text-left text-sm font-medium text-gray-600">N° Informe</th>
+                            <th class="py-3 px-4 border-b text-left text-sm font-medium text-gray-600">Paciente</th>
+                            <th class="py-3 px-4 border-b text-left text-sm font-medium text-gray-600">Estado</th>
+                            <th class="py-3 px-4 border-b text-left text-sm font-medium text-gray-600">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                        <!-- Fila de ejemplo 1 -->
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-3 px-4 border-b text-gray-700">10234</td>
+                            <td class="py-3 px-4 border-b text-gray-700">Juan Pérez</td>
+                            <td class="py-3 px-4 border-b">
+                                <span class="px-3 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">En Revisión</span>
+                            </td>
+                            <td class="py-3 px-4 border-b">
+                                <button onclick="mostrarSeccion('seccion-detalle')" class="text-red-600 hover:underline font-semibold">
+                                    Abrir
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <!-- Fila de ejemplo 2 -->
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-3 px-4 border-b text-gray-700">10233</td>
+                            <td class="py-3 px-4 border-b text-gray-700">María García</td>
+                            <td class="py-3 px-4 border-b">
+                                <span class="px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">Borrador</span>
+                            </td>
+                            <td class="py-3 px-4 border-b">
+                                <button onclick="mostrarSeccion('seccion-detalle')" class="text-red-600 hover:underline font-semibold">
+                                    Abrir
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <!-- Fila de ejemplo 3 -->
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-3 px-4 border-b text-gray-700">10232</td>
+                            <td class="py-3 px-4 border-b text-gray-700">Carlos López</td>
+                            <td class="py-3 px-4 border-b">
+                                <span class="px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Publicado</span>
+                            </td>
+                            <td class="py-3 px-4 border-b">
+                                <button onclick="mostrarSeccion('seccion-detalle')" class="text-red-600 hover:underline font-semibold">
+                                    Abrir
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+
+        <!-- ==================================================================================== -->
+        <!-- 4. VISTA DETALLE / MODO BIOQUÍMICO (MODIFICADO) -->
+        <!-- ==================================================================================== -->
+        <section id="seccion-detalle" class="seccion-app bg-white p-8 rounded-lg shadow-md max-w-4xl mx-auto">
+            
+            <form id="form-carga-resultados" action="#">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6">3. Carga de Resultados (Modo BioquÍmico)</h2>
+                
+                <!-- Encabezado Fijo (simulado) -->
+                <header class="border-b-2 border-gray-300 pb-4 mb-6">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-3xl font-bold text-red-700">UMBRELLA CORPORATION</h3>
+                            <p class="text-gray-600">Domicilio: Raccoon City | Tel: (011) 456-7890</p>
+                            <p class="text-gray-600">Email: info@umbrella.corp | Web: umbrella-corp.com</p>
+                            <!-- AÑADIDO (v5): Horarios (Requisito PDF) -->
+                            <p class="text-sm text-gray-500 mt-1">Horarios: L-V 08:00-20:00 | Sáb 09:00-13:00</p>
+                        </div>
+                        <!-- LOGO SVG -->
+                        <svg class="h-12 w-12" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <polygon points="50,50 50,0 85,15" fill="#E53E3E" />
+                            <polygon points="50,50 85,15 100,50" fill="white" />
+                            <polygon points="50,50 100,50 85,85" fill="#E53E3E" />
+                            <polygon points="50,50 85,85 50,100" fill="white" />
+                            <polygon points="50,50 50,100 15,85" fill="#E53E3E" />
+                            <polygon points="50,50 15,85 0,50" fill="white" />
+                            <polygon points="50,50 0,50 15,15" fill="#E53E3E" />
+                            <polygon points="50,50 15,15 50,0" fill="white" />
+                        </svg>
+                    </div>
+                </header>
+                
+                <!-- Encabezado Variable (Maestro - MODIFICADO PARA COORDINAR) -->
+                <section class="border-b border-gray-200 pb-4 mb-6">
+                    <h4 class="text-xl font-semibold text-gray-700 mb-4">Datos del Informe</h4>
+                    <!-- Grid más denso para mostrar los nuevos datos -->
+                    <div class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm text-gray-800">
+                        <p><strong>N° Informe:</strong> 10234</p>
+                        <p><strong>Estado:</strong> <span class="font-semibold text-yellow-800">En Revisión</span></p>
+                        
+                        <p class="col-span-2 mt-2 font-semibold">Datos del Paciente:</p>
+                        <p><strong>Paciente:</strong> Juan Pérez</p>
+                        <p><strong>DNI:</strong> 20.123.456 | <strong>Edad:</strong> 45</p>
+                        <p><strong>Contacto:</strong> juan.perez@mail.com | 343-4567890</p>
+                        <p><strong>Obras Sociales:</strong> OSDE (Primaria) | IAPSER (Secundaria)</p>
+                        
+                        <p class="col-span-2 mt-2 font-semibold">Datos de Solicitud:</p>
+                        <p><strong>Profesional Lab:</strong> Dra. Ana Méndez (MP 54321)</p>
+                        <p><strong>Fecha Recepción:</strong> 05/11/2025</p>
+                        <!-- MODIFICADO v3: Muestra email y celular del solicitante -->
+                        <p><strong>Solicitante:</strong> Dr. Carlos Ruiz (Cardiología)</p>
+                        <p><strong>Procedencia:</strong> Consultorio San Martín</p>
+                        <p><strong>Contacto Solicitante:</strong> c.ruiz@mail.com | 11-3333-4444</p>
+                    </div>
+                </section>
+
+                <!-- Detalle de Prácticas y Resultados (Ahora es un formulario) -->
+                <section class="mb-6">
+                    <h4 class="text-xl font-semibold text-gray-700 mb-4">Detalle de Prácticas y Resultados</h4>
+                    <div class="overflow-x-auto border border-gray-300 rounded-lg">
+                        <table class="min-w-full">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="py-3 px-4 text-left text-sm font-bold text-gray-600">Estudio / Práctica</th>
+                                    <th class="py-3 px-4 text-left text-sm font-bold text-gray-600">Valor Encontrado</th>
+                                    <th class="py-3 px-4 text-left text-sm font-bold text-gray-600">Valor de Referencia</th>
+                                    <th class="py-3 px-4 text-left text-sm font-bold text-gray-600">Observaciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <!-- Fila 1 - Editable -->
+                                <tr>
+                                    <td class="py-3 px-4">
+                                        <p class="font-semibold text-gray-900">Glucosa</p>
+                                        <p class="text-sm text-gray-500">Muestra: Suero</p>
+                                        <p class="text-sm text-gray-500 italic">Comentario: Ayuno 8hs OK.</p>
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        <input type="text" value="105 mg/dL" class="w-full px-2 py-1 border border-gray-300 rounded-md">
+                                    </td>
+                                    <td class="py-3 px-4 text-gray-700">70 - 100 mg/dL</td>
+                                    <td class="py-3 px-4">
+                                        <input type="text" value="Levemente elevado." class="w-full px-2 py-1 border border-gray-300 rounded-md">
+                                    </td>
+                                </tr>
+                                <!-- Fila 2 - Editable -->
+                                <tr>
+                                    <td class="py-3 px-4">
+                                        <p class="font-semibold text-gray-900">Colesterol Total</p>
+                                        <p class="text-sm text-gray-500">Muestra: Suero</p>
+                                        <p class="text-sm text-gray-500 italic">Comentario: Paciente refiere ayuno 12hs.</p>
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        <input type="text" value="198 mg/dL" class="w-full px-2 py-1 border border-gray-300 rounded-md">
+                                    </td>
+                                    <td class="py-3 px-4 text-gray-700">Hasta 200 mg/dL</td>
+                                    <td class="py-3 px-4">
+                                        <input type="text" placeholder="Opcional" class="w-full px-2 py-1 border border-gray-300 rounded-md">
+                                    </td>
+                                </tr>
+                                <!-- Fila 3 - Vacía, lista para cargar -->
+                                <tr>
+                                    <td class="py-3 px-4">
+                                        <p class="font-semibold text-gray-900">Urea</p>
+                                        <p class="text-sm text-gray-500">Muestra: Suero</p>
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        <input type="text" placeholder="Ingresar valor" class="w-full px-2 py-1 border border-gray-300 rounded-md">
+                                    </td>
+                                    <td class="py-3 px-4 text-gray-700">15 - 45 mg/dL</td>
+                                    <td class="py-3 px-4">
+                                        <input type="text" placeholder="Opcional" class="w-full px-2 py-1 border border-gray-300 rounded-md">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Botones de Acción del Bioquímico -->
+                <div class="flex justify-end space-x-4">
+                    <button type="button" id="btn-guardar-parcial" class="bg-gray-500 hover:bg-gray-600 text-white font-bold px-6 py-2 rounded-lg shadow-md transition-colors">
+                        Guardar Cambios Parciales
+                    </button>
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2 rounded-lg shadow-md transition-colors">
+                        Finalizar y Publicar Informe
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Pie de Informe (simulado) -->
+            <footer class="border-t border-gray-300 pt-4 mt-6 text-sm text-gray-600">
+                <div class="flex justify-between">
+                    <p>Profesional: Dra. Ana Méndez (MP 54321)</p>
+                    <p class="text-right">Generado: 05/11/2025 10:30hs | Página 1 de 1</p>
+                </div>
+            </footer>
+        </section>
+
+
+        <!-- ==================================================================================== -->
+        <!-- 5. SECCIÓN DE REGISTRO -->
+        <!-- ==================================================================================== -->
+        <section id="seccion-registro" class="seccion-app">
+
+            <!-- Paso 1: Selección de tipo de registro -->
+            <div id="registro-paso-1" class="max-w-3xl mx-auto">
+                <h2 class="text-3xl font-semibold text-gray-800 mb-8 text-center">Formulario de Registro</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    
+                    <!-- Tarjeta: Registrar Paciente -->
+                    <div onclick="mostrarFormularioRegistro('form-registro-paciente')" class="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer border border-gray-200 text-center">
+                        <svg class="w-16 h-16 text-red-600 mb-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                        <h3 class="text-2xl font-semibold text-gray-900 mb-2">Registrar Paciente</h3>
+                        <p class="text-gray-600">Crear un nuevo perfil de paciente.</p>
+                    </div>
+
+                    <!-- Tarjeta: Registrar Profesional -->
+                    <div onclick="mostrarFormularioRegistro('form-registro-profesional')" class="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer border border-gray-200 text-center">
+                        <svg class="w-16 h-16 text-gray-700 mb-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.285 23.285 0 0012 12c-3.056 0-6 0-9 1.255m9-9.338c-3.056 0-6 0-9 1.255m0 0V5.166a2.25 2.25 0 012.25-2.25h.01m13.49.01h.01M21 12v6.834a2.25 2.25 0 01-2.25 2.25h-13.5A2.25 2.25 0 013 18.834V12m0-6.834V5.166A2.25 2.25 0 015.25 2.916h13.5A2.25 2.25 0 0121 5.166v.668m0 0v1.166a2.25 2.25 0 002.25 2.25h.01M5.25 12h.01M12 12h.01M18.75 12h.01M5.25 16.5h.01M12 16.5h.01M18.75 16.5h.01"></path></svg>
+                        <h3 class="text-2xl font-semibold text-gray-900 mb-2">Registrar Profesional</h3>
+                        <p class="text-gray-600">Dar de alta un Bioquímico o Médico Solicitante.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Paso 2: Formulario de Paciente (Campos Requeridos) -->
+            <form id="form-registro-paciente" action="#" method="POST" class="bg-white p-8 rounded-lg shadow-md max-w-3xl mx-auto" style="display: none;">
+                <button type="button" onclick="volverARegistroPaso1()" class="text-red-600 hover:underline mb-4">&larr; Volver</button>
+                <h3 class="text-2xl font-semibold text-gray-800 mb-6">Datos del Paciente</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="reg-pac-dni" class="block text-sm font-medium text-gray-700 mb-1">DNI:</label>
+                        <input type="text" id="reg-pac-dni" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <label for="reg-pac-nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre y Apellido:</label>
+                        <input type="text" id="reg-pac-nombre" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <label for="reg-pac-nacimiento" class="block text-sm font-medium text-gray-700 mb-1">Fecha de Nacimiento:</label>
+                        <input type="date" id="reg-pac-nacimiento" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <label for="reg-pac-genero" class="block text-sm font-medium text-gray-700 mb-1">Género:</label>
+                        <select id="reg-pac-genero" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                            <option value="masculino">Masculino</option>
+                            <option value="femenino">Femenino</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="reg-pac-os1" class="block text-sm font-medium text-gray-700 mb-1">Obra Social Primaria:</label>
+                        <input type="text" id="reg-pac-os1" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <label for="reg-pac-os2" class="block text-sm font-medium text-gray-700 mb-1">Obra Social Secundaria (Opcional):</label>
+                        <input type="text" id="reg-pac-os2" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                     <div>
+                        <label for="reg-pac-celular" class="block text-sm font-medium text-gray-700 mb-1">Celular:</label>
+                        <input type="tel" id="reg-pac-celular" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <label for="reg-pac-email" class="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico:</label>
+                        <input type="email" id="reg-pac-email" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                </div>
+                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold w-full px-6 py-3 rounded-lg shadow-md transition-colors mt-8">
+                    Registrar Paciente
+                </button>
+            </form>
+
+            <!-- Paso 2: Formulario de Profesional (Campos Requeridos) -->
+            <form id="form-registro-profesional" action="#" method="POST" class="bg-white p-8 rounded-lg shadow-md max-w-3xl mx-auto" style="display: none;">
+                <button type="button" onclick="volverARegistroPaso1()" class="text-red-600 hover:underline mb-4">&larr; Volver</button>
+                <h3 class="text-2xl font-semibold text-gray-800 mb-6">Datos del Profesional</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="reg-prof-mp" class="block text-sm font-medium text-gray-700 mb-1">Matrícula Profesional (MP):</label>
+                        <input type="text" id="reg-prof-mp" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <label for="reg-prof-nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre y Apellido:</label>
+                        <input type="text" id="reg-prof-nombre" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <label for="reg-prof-especialidad" class="block text-sm font-medium text-gray-700 mb-1">Especialidad:</label>
+                        <input type="text" id="reg-prof-especialidad" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <label for="reg-prof-celular" class="block text-sm font-medium text-gray-700 mb-1">Celular:</label>
+                        <input type="tel" id="reg-prof-celular" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="reg-prof-email" class="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico:</label>
+                        <input type="email" id="reg-prof-email" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <hr class="md:col-span-2 my-2">
+                    <div>
+                        <label for="reg-prof-tipo" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Profesional:</label>
+                        <select id="reg-prof-tipo" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                            <option value="bioquimico">Bioquímico (Interno)</option>
+                            <option value="solicitante">Médico Solicitante (Externo)</option>
+                        </select>
+                    </div>
+                    <!-- Campo Condicional -->
+                    <div id="campo-institucion" style="display: none;">
+                        <label for="reg-prof-institucion" class="block text-sm font-medium text-gray-700 mb-1">Institución donde trabaja:</label>
+                        <input type="text" id="reg-prof-institucion" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                </div>
+                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold w-full px-6 py-3 rounded-lg shadow-md transition-colors mt-8">
+                    Registrar Profesional
+                </button>
+            </form>
+
+        </section>
+
+
+        <!-- ==================================================================================== -->
+        <!-- 6. SECCIÓN GESTIÓN DE NOMENCLADOR (MODIFICADO v3) -->
+        <!-- ==================================================================================== -->
+        <section id="seccion-nomenclador" class="seccion-app bg-white p-8 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6">Gestión de Nomenclador</h2>
+
+            <!-- Formulario de Búsqueda y Acciones -->
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                <div class="relative w-full md:w-1/2">
+                    <!-- AÑADIDO ID para el filtro JS -->
+                    <input type="text" id="search_nomenclador" placeholder="Buscar por código o descripción..." class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    <span class="absolute right-3 top-2.5 text-gray-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </span>
+                </div>
+                <button class="bg-gray-700 hover:bg-gray-800 text-white font-semibold px-4 py-2 rounded-lg shadow w-full md:w-auto">
+                    Actualizar Nomenclador
+                </button>
+            </div>
+
+            <!-- Tabla de Estudios -->
+            <div class="overflow-x-auto border border-gray-300 rounded-lg">
+                <table class="min-w-full">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="py-3 px-4 text-left text-sm font-bold text-gray-600">Código Nacional</th>
+                            <th class="py-3 px-4 text-left text-sm font-bold text-gray-600">Descripción</th>
+                            <th class="py-3 px-4 text-left text-sm font-bold text-gray-600">Requisitos Previos</th>
+                        </tr>
+                    </thead>
+                    <!-- AÑADIDO ID para el filtro JS -->
+                    <tbody id="tabla_nomenclador_body" class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td class="py-3 px-4 text-gray-700 font-mono">15.01.01</td>
+                            <td class="py-3 px-4 font-semibold text-gray-900">Glucosa</td>
+                            <td class="py-3 px-4 text-gray-700">Ayuno de 8 horas.</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 text-gray-700 font-mono">15.01.02</td>
+                            <td class="py-3 px-4 font-semibold text-gray-900">Colesterol Total</td>
+                            <td class="py-3 px-4 text-gray-700">Ayuno de 12 horas.</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 text-gray-700 font-mono">15.01.03</td>
+                            <td class="py-3 px-4 font-semibold text-gray-900">Urea</td>
+                            <td class="py-3 px-4 text-gray-700">Ayuno de 8 horas.</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 text-gray-700 font-mono">15.02.01</td>
+                            <td class="py-3 px-4 font-semibold text-gray-900">Hemograma Completo</td>
+                            <td class="py-3 px-4 text-gray-700">No requiere ayuno.</td>
+                        </tr>
+                        <tr class="bg-red-50">
+                            <td class="py-3 px-4 text-red-700 font-mono">66.06.06</td>
+                            <td class="py-3 px-4 font-semibold text-red-800">Test de Zombificación (T-Virus)</td>
+                            <td class="py-3 px-4 text-red-700">No morder a nadie.</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="py-3 px-4 text-gray-700 font-mono">99.00.00</td>
+                            <td class="py-3 px-4 font-semibold text-gray-900">Test de Aptitud U.B.C.S.</td>
+                            <td class="py-3 px-4 text-gray-700">Traer seguro de vida (propio).</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ==================================================================================== -->
+        <!-- 7. SECCIÓN "NOSOTROS" -->
+        <!-- ==================================================================================== -->
+        <section id="seccion-nosotros-placeholder" class="seccion-app bg-white p-8 rounded-lg shadow-md">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6">Sobre Umbrella Corporation</h2>
+            <div class="space-y-4 text-gray-700 prose max-w-none">
+                <p>Umbrella Corporation es líder mundial en investigación biomédica, productos farmacéuticos y tecnología de la salud.</p>
+                <p>Nuestra División de Laboratorio está comprometida con la precisión, la velocidad y la seguridad en todos los análisis clínicos, utilizando tecnología de punta para brindar resultados confiables a pacientes y profesionales de la salud.</p>
+                <p>Todos nuestros protocolos están diseñados para minimizar riesgos, incluyendo aquellos poco frecuentes como mutaciones celulares espontáneas, pérdida de conciencia racional o comportamientos no compatibles con la vida humana tradicional. En casos excepcionales, estos efectos pueden manifestarse en estados de hiperadaptación biológica, comúnmente malinterpretados como zombificación.</p>
+            </div>
+        </section>
+
+        <!-- ==================================================================================== -->
+        <!-- 8. SECCIONES DEL FOOTER (CONTENIDO DE FANTASÍA) -->
+        <!-- ==================================================================================== -->
+
+        <!-- 8.1 Resultados Online -->
+        <section id="seccion-resultados-online" class="seccion-app bg-white p-8 rounded-lg shadow-md">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6">Portal de Pacientes: Resultados Online</h2>
+            <div class="space-y-4 text-gray-700 prose max-w-none">
+                <p>Bienvenido al portal seguro de pacientes. Para ver sus resultados, ingrese el DNI y el código de acceso único enviado a su correo electrónico al momento de su admisión.</p>
+                <p>Recuerde: sus resultados son confidenciales. No comparta su código de acceso.</p>
+                <form class="flex items-end space-x-4">
+                    <div>
+                        <label for="res-dni" class="block text-sm font-medium text-gray-700 mb-1">DNI:</label>
+                        <input type="text" id="res-dni" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <label for="res-codigo" class="block text-sm font-medium text-gray-700 mb-1">Código de Acceso:</label>
+                        <input type="text" id="res-codigo" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg shadow">Ver Resultados</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- 8.2 Portal de Profesionales -->
+        <section id="seccion-portal-profesionales" class="seccion-app bg-white p-8 rounded-lg shadow-md">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6">Portal de Profesionales</h2>
+            <div class="space-y-4 text-gray-700 prose max-w-none">
+                <p>Acceso exclusivo para Médicos Solicitantes y Bioquímicos adheridos.</p>
+                <p>Ingrese con su Matrícula Profesional y contraseña asignada por la administración de Umbrella.</p>
+                <p>Aquí podrá gestionar sus pacientes, ver historiales de informes y acceder a estadísticas de la División de Laboratorio.</p>
+                <button class="bg-gray-700 hover:bg-gray-800 text-white font-semibold px-4 py-2 rounded-lg shadow" onclick="document.getElementById('open-login-button').click()">
+                    Ir a Iniciar Sesión
+                </button>
+            </div>
+        </section>
+
+        <!-- 8.3 Preguntas Frecuentes (Parodia) -->
+        <section id="seccion-faq" class="seccion-app bg-white p-8 rounded-lg shadow-md">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6">Preguntas Frecuentes (FAQ)</h2>
+            <div class="space-y-6 text-gray-700 prose max-w-none">
+                
+                <div>
+                    <h3 class="font-semibold text-gray-900">1. ¿Qué significa "Hiperadaptación Biológica"?</h3>
+                    <p>Es un término técnico que describe una respuesta celular acelerada a nuestros tratamientos antivirales (como el T-Virus). El sujeto experimenta una regeneración de tejidos mejorada, aumento de la fuerza y una disminución de las funciones cognitivas superiores. Es un efecto secundario deseado y controlado.</p>
+                </div>
+
+                <div>
+                    <h3 class="font-semibold text-gray-900">2. ¿Qué debo hacer si un familiar muestra signos de "Hiperadaptación" (ej. mordiscos, gruñidos)?</h3>
+                    <p>¡No se alarme! Es probable que solo sea una reacción estándar. Mantenga al sujeto en un área ventilada, evite movimientos bruscos y contacte a nuestro equipo de Contención (U.B.C.S.) al teléfono que figura en su informe. No intente neutralizar al sujeto usted mismo; nuestros técnicos lo tranquilizarán profesionalmente.</p>
+                </div>
+
+                <div>
+                    <h3 class="font-semibold text-gray-900">3. ¿Es contagioso?</h3>
+                    <p>La "Hiperadaptación" no es contagiosa por aire. Sin embargo, la transferencia directa de fluidos corporales (como una mordedura profunda) puede iniciar el proceso en un nuevo huésped. Recomendamos mantener una distancia social prudente con los sujetos en estado de hiperadaptación activa.</p>
+                </div>
+
+                <div>
+                    <h3 class="font-semibold text-gray-900">4. ¿Mis resultados están seguros?</h3>
+                    <p>Absolutamente. Toda la información de los pacientes está protegida por "La Reina Roja", nuestro sistema de inteligencia artificial de última generación. Sus datos están más seguros con nosotros que en cualquier otro lugar.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8.4 Contacto -->
+        <section id="seccion-contacto" class="seccion-app bg-white p-8 rounded-lg shadow-md">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6">Contacto</h2>
+            <div class="space-y-4 text-gray-700 prose max-w-none">
+                <p>Para consultas administrativas o turnos (fuera de este sistema), contáctenos:</p>
+                <ul>
+                    <li><strong>Teléfono Principal:</strong> (011) 456-7890 (Sector Laboratorio)</li>
+                    <li><strong>Consultas Corporativas:</strong> (011) 456-1111 (Sede Raccoon City)</li>
+                    <li><strong>Email (Pacientes):</strong> info@umbrella.corp</li>
+                    <li><strong>Email (Profesionales):</strong> medicos@umbrella.corp</li>
+                </ul>
+                <p><strong>Urgencias Biológicas (24hs):</strong> Llame al 0-800-UMBRELLA y será atendido por un equipo de U.B.C.S.</p>
+            </div>
+        </section>
+
+        <!-- 8.5 Términos de Servicio -->
+        <section id="seccion-terminos" class="seccion-app bg-white p-8 rounded-lg shadow-md">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6">Términos de Servicio</h2>
+            <div class="space-y-4 text-gray-700 prose max-w-none">
+                <p>Al utilizar este portal, usted (en adelante "El Paciente" o "El Sujeto de Pruebas") acepta todos los términos y condiciones de Umbrella Corporation.</p>
+                <p>1. El Paciente cede todos los derechos sobre cualquier muestra biológica (sangre, tejido, fluidos) a Umbrella Corporation para fines de investigación, desarrollo y armamento biológico (si aplica).</p>
+                <p>2. Umbrella Corporation no se hace responsable por efectos secundarios adversos, incluyendo, pero no limitándose a: pérdida de memoria, necrosis dérmica, aumento de la agresividad, apetito por la carne humana o reanimación post-mortem.</p>
+                <p>3. La confidencialidad de los resultados está garantizada, excepto en casos de brote pandémico o cuarentena de Nivel 4, donde sus datos serán compartidos con las autoridades de U.B.C.S.</p>
+            </div>
+        </section>
+
+        <!-- 8.6 Política de Privacidad -->
+        <section id="seccion-privacidad" class="seccion-app bg-white p-8 rounded-lg shadow-md">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6">Política de Privacidad</h2>
+            <div class="space-y-4 text-gray-700 prose max-w-none">
+                <p>Su privacidad es importante para nosotros. (No realmente, pero debemos ponerlo).</p>
+                <p>Toda su información es monitoreada activamente por nuestra I.A. "La Reina Roja" para predecir patrones de salud y brotes virales. Al aceptar, usted consiente este monitoreo 24/7.</p>
+                <p>Umbrella Corporation se reserva el derecho de vender sus datos genéticos anonimizados a nuestras subsidiarias de investigación y desarrollo de bio-armas. No se preocupe, su nombre no será utilizado.</p>
+            </div>
+        </section>
+
+        <!-- 8.7 Nuestras Instalaciones (NUEVO) -->
+        <section id="seccion-instalaciones" class="seccion-app bg-white p-8 rounded-lg shadow-md">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6">Nuestras Instalaciones</h2>
+            <div class="space-y-4 text-gray-700 prose max-w-none">
+                <p>Nuestra División de Laboratorio opera desde el complejo subterráneo "El Panal" (The Hive), ubicado estratégicamente bajo la ciudad de Raccoon City.</p>
+                <p>Contamos con 10 niveles de laboratorios de Bioseguridad Nivel 4 (BSL-4), áreas de contención reforzadas y el centro de datos principal que aloja a nuestra I.A. "La Reina Roja".</p>
+                <p>Todas las muestras son procesadas utilizando lo último en tecnología de análisis automatizado, garantizando resultados en menos de 24 horas y una tasa de error inferior al 0.01% (excluyendo mutaciones imprevistas).</p>
+            </div>
+        </section>
+
+
+        <!-- ==================================================================================== -->
+        <!-- 9. SECCIÓN DE OPINIONES -->
+        <!-- ==================================================================================== -->
+        <section id="seccion-opiniones" class="seccion-app bg-white p-8 rounded-lg shadow-md">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6">Opiniones de Nuestros Pacientes</h2>
+            <div class="space-y-8">
+                
+                <!-- Opinión 1: 5 Estrellas -->
+                <div class="border-b pb-6">
+                    <div class="flex items-center mb-2">
+                        <!-- 5 Estrellas -->
+                        <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900">¡Resultados increíbles!</h3>
+                    <p class="text-gray-700 mt-2">"Gracias a la División Laboratorio, mi 'hiperadaptación' fue un éxito. Me siento más fuerte y con menos apetito por la comida cocinada. 10/10."</p>
+                    <p class="text-sm text-gray-500 mt-2">- Almeida Verónica</p>
+                </div>
+
+                <!-- Opinión 2: 4 Estrellas (MODIFICADO) -->
+                <div class="border-b pb-6">
+                    <div class="flex items-center mb-2">
+                        <!-- 4 Estrellas -->
+                        <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        <svg class="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900">Buen servicio, un poco desorganizado.</h3>
+                    <p class="text-gray-700 mt-2">"El personal fue muy amable, pero el Lic. Orundés Cardinali no paraba de murmurar sobre 'G-Virus' y se llevó mi muestra en un maletín. El café de la sala de espera es bueno. 4 estrellas."</p>
+                    <p class="text-sm text-gray-500 mt-2">- Martín Mariano.</p>
+                </div>
+
+                <!-- Opinión 3: NUEVA 3 Estrellas -->
+                <div class="border-b pb-6">
+                    <div class="flex items-center mb-2">
+                        <!-- 3 Estrellas -->
+                        <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        <svg class="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        <svg class="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900">Servicio rápido, pero... ¿dónde está mi brazo?</h3>
+                    <p class="text-gray-700 mt-2">"El análisis fue muy rápido y la app es genial. Le doy 3 estrellas porque el enfermero que me sacó sangre (un tipo enorme con gabardina) me dijo que 'las estrellas no importan' y creo que se llevó mi brazo. No estoy seguro. ¿El brazo es un requisito?"</p>
+                    <p class="text-sm text-gray-500 mt-2">- Cacholatti Bárbara</p>
+                </div>
+
+                <!-- Opinión 4: 1 Estrella (Antes Opinión 3) -->
+                <div>
+                    <div class="flex items-center mb-2">
+                        <!-- 1 Estrella -->
+                        <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        <svg class="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        <svg class="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        <svg class="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        <svg class="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900">NO VENGAN A ESTE LUGAR</h3>
+                    <p class="text-gray-700 mt-2">"Vine por un análisis de sangre y terminé en un complejo subterráneo lleno de perros mutantes. El servicio al cliente es pésimo. Y creo que un tal 'Nemesis' me está siguiendo. 0 estrellas (me obligan a poner una)."</p>
+                    <p class="text-sm text-gray-500 mt-2">- Aranda Gustavo</p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ==================================================================================== -->
+        <!-- 10. SECCIÓN DE NOVEDADES (NUEVA) -->
+        <!-- ==================================================================================== -->
+        <section id="seccion-novedades" class="seccion-app bg-white p-8 rounded-lg shadow-md">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6">Novedades Corporativas</h2>
+            <div class="space-y-4 text-gray-700 prose max-w-none">
+                <h3 class="font-semibold text-gray-900">Incorporación Estratégica: Ingeniería Software I (UADER)</h3>
+                <p>Umbrella Corporation se complace en anunciar la incorporación de la cátedra <strong>Ingeniería Software I</strong> de la prestigiosa Universidad Autónoma de Entre Ríos (UADER), Facultad de Ciencia y Tecnología.</p>
+                <p>Este acuerdo estratégico nos permite integrar a nuestro equipo de desarrollo a los siguientes docentes de élite, quienes supervisarán la optimización de nuestros sistemas (incluyendo el portal de pacientes y los protocolos de 'La Reina Roja'):</p>
+                <ul class="list-disc list-inside">
+                    <li>Lic. Pamela Bonadeo</li>
+                    <li>Lic. Damián Cian</li>
+                    <li>Lic. Orundés Cardinali</li>
+                </ul>
+                <p>Su experiencia será vital para asegurar que nuestros sistemas de contención y análisis de datos operen con la máxima eficiencia.</p>
+            </div>
+        </section>
+
+
+        <!-- ... (Resto de las secciones 8.x) ... -->
+        <!-- 8.1 Resultados Online -->
+        <section id="seccion-resultados-online" class="seccion-app bg-white p-8 rounded-lg shadow-md">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6">Portal de Pacientes: Resultados Online</h2>
+            <div class="space-y-4 text-gray-700 prose max-w-none">
+                <p>Bienvenido al portal seguro de pacientes. Para ver sus resultados, ingrese el DNI y el código de acceso único enviado a su correo electrónico al momento de su admisión.</p>
+                <p>Recuerde: sus resultados son confidenciales. No comparta su código de acceso.</p>
+                <form class="flex items-end space-x-4">
+                    <div>
+                        <label for="res-dni" class="block text-sm font-medium text-gray-700 mb-1">DNI:</label>
+                        <input type="text" id="res-dni" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <label for="res-codigo" class="block text-sm font-medium text-gray-700 mb-1">Código de Acceso:</label>
+                        <input type="text" id="res-codigo" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg shadow">Ver Resultados</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- 8.2 Portal de Profesionales -->
+        <section id="seccion-portal-profesionales" class="seccion-app bg-white p-8 rounded-lg shadow-md">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6">Portal de Profesionales</h2>
+            <div class="space-y-4 text-gray-700 prose max-w-none">
+                <p>Acceso exclusivo para Médicos Solicitantes y Bioquímicos adheridos.</p>
+                <p>Ingrese con su Matrícula Profesional y contraseña asignada por la administración de Umbrella.</p>
+                <p>Aquí podrá gestionar sus pacientes, ver historiales de informes y acceder a estadísticas de la División de Laboratorio.</p>
+                <button class="bg-gray-700 hover:bg-gray-800 text-white font-semibold px-4 py-2 rounded-lg shadow" onclick="document.getElementById('open-login-button').click()">
+                    Ir a Iniciar Sesión
+                </button>
+            </div>
+        </section>
+
+        <!-- 8.3 Preguntas Frecuentes (Parodia) -->
+        <section id="seccion-faq" class="seccion-app bg-white p-8 rounded-lg shadow-md">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6">Preguntas Frecuentes (FAQ)</h2>
+            <div class="space-y-6 text-gray-700 prose max-w-none">
+                
+                <div>
+                    <h3 class="font-semibold text-gray-900">1. ¿Qué significa "Hiperadaptación Biológica"?</h3>
+                    <p>Es un término técnico que describe una respuesta celular acelerada a nuestros tratamientos antivirales (como el T-Virus). El sujeto experimenta una regeneración de tejidos mejorada, aumento de la fuerza y una disminución de las funciones cognitivas superiores. Es un efecto secundario deseado y controlado.</p>
+                </div>
+
+                <div>
+                    <h3 class="font-semibold text-gray-900">2. ¿Qué debo hacer si un familiar muestra signos de "Hiperadaptación" (ej. mordiscos, gruñidos)?</h3>
+                    <p>¡No se alarme! Es probable que solo sea una reacción estándar. Mantenga al sujeto en un área ventilada, evite movimientos bruscos y contacte a nuestro equipo de Contención (U.B.C.S.) al teléfono que figura en su informe. No intente neutralizar al sujeto usted mismo; nuestros técnicos lo tranquilizarán profesionalmente.</p>
+                </div>
+
+                <div>
+                    <h3 class="font-semibold text-gray-900">3. ¿Es contagioso?</h3>
+                    <p>La "Hiperadaptación" no es contagiosa por aire. Sin embargo, la transferencia directa de fluidos corporales (como una mordedura profunda) puede iniciar el proceso en un nuevo huésped. Recomendamos mantener una distancia social prudente con los sujetos en estado de hiperadaptación activa.</p>
+                </div>
+
+                <div>
+                    <h3 class="font-semibold text-gray-900">4. ¿Mis resultados están seguros?</h3>
+                    <p>Absolutamente. Toda la información de los pacientes está protegida por "La Reina Roja", nuestro sistema de inteligencia artificial de última generación. Sus datos están más seguros con nosotros que en cualquier otro lugar.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8.4 Contacto -->
+        <section id="seccion-contacto" class="seccion-app bg-white p-8 rounded-lg shadow-md">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6">Contacto</h2>
+            <div class="space-y-4 text-gray-700 prose max-w-none">
+                <p>Para consultas administrativas o turnos (fuera de este sistema), contáctenos:</p>
+                <ul>
+                    <li><strong>Teléfono Principal:</strong> (011) 456-7890 (Sector Laboratorio)</li>
+                    <li><strong>Consultas Corporativas:</strong> (011) 456-1111 (Sede Raccoon City)</li>
+                    <li><strong>Email (Pacientes):</strong> info@umbrella.corp</li>
+                    <li><strong>Email (Profesionales):</strong> medicos@umbrella.corp</li>
+                </ul>
+                <p><strong>Urgencias Biológicas (24hs):</strong> Llame al 0-800-UMBRELLA y será atendido por un equipo de U.B.C.S.</p>
+            </div>
+        </section>
+
+        <!-- 8.5 Términos de Servicio -->
+        <section id="seccion-terminos" class="seccion-app bg-white p-8 rounded-lg shadow-md">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6">Términos de Servicio</h2>
+            <div class="space-y-4 text-gray-700 prose max-w-none">
+                <p>Al utilizar este portal, usted (en adelante "El Paciente" o "El Sujeto de Pruebas") acepta todos los términos y condiciones de Umbrella Corporation.</p>
+                <p>1. El Paciente cede todos los derechos sobre cualquier muestra biológica (sangre, tejido, fluidos) a Umbrella Corporation para fines de investigación, desarrollo y armamento biológico (si aplica).</p>
+                <p>2. Umbrella Corporation no se hace responsable por efectos secundarios adversos, incluyendo, pero no limitándose a: pérdida de memoria, necrosis dérmica, aumento de la agresividad, apetito por la carne humana o reanimación post-mortem.</p>
+                <p>3. La confidencialidad de los resultados está garantizada, excepto en casos de brote pandémico o cuarentena de Nivel 4, donde sus datos serán compartidos con las autoridades de U.B.C.S.</p>
+            </div>
+        </section>
+
+        <!-- 8.6 Política de Privacidad -->
+        <section id="seccion-privacidad" class="seccion-app bg-white p-8 rounded-lg shadow-md">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6">Política de Privacidad</h2>
+            <div class="space-y-4 text-gray-700 prose max-w-none">
+                <p>Su privacidad es importante para nosotros. (No realmente, pero debemos ponerlo).</p>
+                <p>Toda su información es monitoreada activamente por nuestra I.A. "La Reina Roja" para predecir patrones de salud y brotes virales. Al aceptar, usted consiente este monitoreo 24/7.</p>
+                <p>Umbrella Corporation se reserva el derecho de vender sus datos genéticos anonimizados a nuestras subsidiarias de investigación y desarrollo de bio-armas. No se preocupe, su nombre no será utilizado.</p>
+            </div>
+        </section>
+
+        <!-- 8.7 Nuestras Instalaciones (NUEVO) -->
+        <section id="seccion-instalaciones" class="seccion-app bg-white p-8 rounded-lg shadow-md">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6">Nuestras Instalaciones</h2>
+            <div class="space-y-4 text-gray-700 prose max-w-none">
+                <p>Nuestra División de Laboratorio opera desde el complejo subterráneo "El Panal" (The Hive), ubicado estratégicamente bajo la ciudad de Raccoon City.</p>
+                <p>Contamos con 10 niveles de laboratorios de Bioseguridad Nivel 4 (BSL-4), áreas de contención reforzadas y el centro de datos principal que aloja a nuestra I.A. "La Reina Roja".</p>
+                <p>Todas las muestras son procesadas utilizando lo último en tecnología de análisis automatizado, garantizando resultados en menos de 24 horas y una tasa de error inferior al 0.01% (excluyendo mutaciones imprevistas).</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ==================================================================================== -->
+    <!-- FOOTER PRINCIPAL -->
+    <!-- ==================================================================================== -->
+    <footer class="bg-black text-gray-300 mt-12 py-10">
+        <div class="container mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                <!-- Columna 1: Logo y Nombre -->
+                <div>
+                    <div class="flex items-center space-x-4 mb-4">
+                        <!-- LOGO SVG DIBUJADO -->
+                        <svg class="h-10 w-10" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <polygon points="50,50 50,0 85,15" fill="#E53E3E" />
+                            <polygon points="50,50 85,15 100,50" fill="white" />
+                            <polygon points="50,50 100,50 85,85" fill="#E53E3E" />
+                            <polygon points="50,50 85,85 50,100" fill="white" />
+                            <polygon points="50,50 50,100 15,85" fill="#E53E3E" />
+                            <polygon points="50,50 15,85 0,50" fill="white" />
+                            <polygon points="50,50 0,50 15,15" fill="#E53E3E" />
+                            <polygon points="50,50 15,15 50,0" fill="white" />
+                        </svg>
+                        <div>
+                            <h1 class="text-xl font-bold text-white uppercase font-orbitron">
+                                Umbrella Corporation
+                            </h1>
+                            <p class="text-sm font-semibold text-red-600">División Laboratorio</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-400">
+                        © 2025 Umbrella Corporation.<br>Todos los derechos reservados.
+                    </p>
+                </div>
+
+                <!-- Columna 2: Enlaces (Ejemplo) -->
+                <div>
+                    <h5 class="text-lg font-semibold text-white uppercase mb-4">Recursos</h5>
+                    <ul class="space-y-2 text-sm">
+                        <li><button onclick="mostrarSeccion('seccion-resultados-online')" class="hover:text-red-500 hover:underline">Resultados Online (Pacientes)</button></li>
+                        <li><button onclick="mostrarSeccion('seccion-portal-profesionales')" class="hover:text-red-500 hover:underline">Portal de Profesionales</button></li>
+                        <!-- Enlace "Preguntas Frecuentes" REEMPLAZADO -->
+                        <li><button onclick="mostrarSeccion('seccion-instalaciones')" class="hover:text-red-500 hover:underline">Nuestras Instalaciones</button></li>
+                    </ul>
+                </div>
+
+                <!-- Columna 3: Enlaces (Ejemplo) -->
+                <div>
+                    <h5 class="text-lg font-semibold text-white uppercase mb-4">Corporativo</h5>
+                    <ul class="space-y-2 text-sm">
+                        <li><button onclick="mostrarSeccion('seccion-contacto')" class="hover:text-red-500 hover:underline">Contacto</button></li>
+                        <li><button onclick="mostrarSeccion('seccion-terminos')" class="hover:text-red-500 hover:underline">Términos de Servicio</button></li>
+                        <li><button onclick="mostrarSeccion('seccion-privacidad')" class="hover:text-red-500 hover:underline">Política de Privacidad</button></li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
     </footer>
+
+    <!-- ==================================================================================== -->
+    <!-- 0. PANTALLA DE LOGIN (MODAL SUPERPUESTO) -->
+    <!-- ==================================================================================== -->
+    <section id="seccion-login" class="fixed inset-0 flex items-center justify-center p-6 z-50" style="display: none;">
+        <!-- Fondo de imagen y overlay -->
+        <!-- Imagen de fondo eliminada para estabilidad -->
+        <div class="absolute inset-0 bg-black opacity-90 z-40"></div> <!-- Overlay oscuro -->
+
+        <!-- Caja de Login -->
+        <div class="bg-black rounded-lg shadow-xl p-8 w-full max-w-md relative z-50">
+            
+            <button id="close-login-button" class="absolute top-4 right-4 text-gray-500 hover:text-gray-300">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+
+            <!-- Logo y Título del Login -->
+            <div class="flex flex-col items-center mb-6">
+                 <!-- LOGO SVG -->
+                <svg class="h-16 w-16" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <polygon points="50,50 50,0 85,15" fill="#E53E3E" />
+                    <polygon points="50,50 85,15 100,50" fill="white" />
+                    <polygon points="50,50 100,50 85,85" fill="#E53E3E" />
+                    <polygon points="50,50 85,85 50,100" fill="white" />
+                    <polygon points="50,50 50,100 15,85" fill="#E53E3E" />
+                    <polygon points="50,50 15,85 0,50" fill="white" />
+                    <polygon points="50,50 0,50 15,15" fill="#E53E3E" />
+                    <polygon points="50,50 15,15 50,0" fill="white" />
+                </svg>
+                <h1 class="text-3xl font-bold text-white uppercase font-orbitron mt-4">
+                    Umbrella Corporation
+                </h1>
+                <p class="text-lg text-red-600 font-semibold">División Laboratorio</p>
+            </div>
+            
+            <form id="login-form">
+                <div class="space-y-4">
+                    <div>
+                        <label for="usuario" class="block text-sm font-medium text-gray-300 mb-1">Usuario (MP o DNI):</label>
+                        <input type="text" id="usuario" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-300 mb-1">Contraseña:</label>
+                        <input type="password" id="password" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                </div>
+                
+                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold w-full px-6 py-3 rounded-lg shadow-md transition-colors mt-8">
+                    Ingresar
+                </button>
+            </form>
+
+            <!-- Botón para ir a Registrarse -->
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-400">
+                    ¿No tienes una cuenta?
+                    <button id="login-to-register-button" class="font-semibold text-red-600 hover:text-red-500 hover:underline">
+                        Regístrate aquí
+                    </button>
+                </p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SCRIPTS DE JAVASCRIPT AL FINAL -->
+    <script>
+        // --- FUNCIÓN PARA MOSTRAR NOTIFICACIONES ---
+        function mostrarNotificacion(mensaje, tipo = 'info') {
+            const container = document.getElementById('toast-container');
+            
+            // Crear el elemento toast
+            const toast = document.createElement('div');
+            toast.className = `toast ${tipo}`;
+            toast.innerText = mensaje;
+            
+            // Añadir al contenedor
+            container.appendChild(toast);
+            
+            // Remover después de 3.5 segundos
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    if (container.contains(toast)) {
+                        container.removeChild(toast);
+                    }
+                }, 500); // Espera a que termine la animación de fadeOut
+            }, 3500);
+        }
+
+        // --- SCRIPT PARA NAVEGACIÓN DE SECCIONES ---
+        
+        function mostrarSeccion(idSeccion) {
+            document.querySelectorAll('.seccion-app').forEach(function(seccion) {
+                seccion.style.display = 'none';
+            });
+            const seccionActiva = document.getElementById(idSeccion);
+            if (seccionActiva) {
+                seccionActiva.style.display = 'block';
+                if (idSeccion === 'seccion-registro') {
+                    // Asegura que al ir a registro, empiece en el paso 1
+                    document.getElementById('registro-paso-1').style.display = 'block';
+                    document.getElementById('form-registro-paciente').style.display = 'none';
+                    document.getElementById('form-registro-profesional').style.display = 'none';
+                }
+            }
+             // Asegura que el scroll suba al cambiar de sección
+             window.scrollTo(0, 0);
+        }
+
+        // --- SCRIPT PARA PESTAÑAS DE REGISTRO ---
+        
+        function mostrarFormularioRegistro(idFormulario) {
+            document.getElementById('registro-paso-1').style.display = 'none';
+            document.getElementById(idFormulario).style.display = 'block';
+        }
+
+        function volverARegistroPaso1() {
+            document.getElementById('registro-paso-1').style.display = 'block';
+            document.getElementById('form-registro-paciente').style.display = 'none';
+            document.getElementById('form-registro-profesional').style.display = 'none';
+        }
+
+        // --- SCRIPT PARA TABLA DINÁMICA DE PRÁCTICAS ---
+        function eliminarFila(boton) {
+            boton.closest('tr').remove();
+            // Notificación eliminada
+        }
+
+        // --- SCRIPT PARA SETEAR FECHA DE HOY ---
+        function setHoy(idCampo) {
+            const campoFecha = document.getElementById(idCampo);
+            if (!campoFecha) return;
+            
+            const hoy = new Date();
+            const anio = hoy.getFullYear();
+            const mes = String(hoy.getMonth() + 1).padStart(2, '0'); // Enero es 0
+            const dia = String(hoy.getDate()).padStart(2, '0');
+            
+            campoFecha.value = `${anio}-${mes}-${dia}`;
+        }
+
+        // --- (NUEVO v5) FUNCIÓN PARA CALCULAR EDAD ---
+        function calcularEdad(fechaNacimiento) {
+            if (!fechaNacimiento) return '?'; // Devuelve '?' si no hay fecha
+            const hoy = new Date();
+            const cumple = new Date(fechaNacimiento);
+            let edad = hoy.getFullYear() - cumple.getFullYear();
+            const m = hoy.getMonth() - cumple.getMonth();
+            // Ajusta la edad si el cumpleaños de este año aún no ha pasado
+            if (m < 0 || (m === 0 && hoy.getDate() < cumple.getDate())) {
+                edad--;
+            }
+            return edad;
+        }
+
+        // --- FUNCIONES HELPER PARA HABILITAR/DESHABILITAR CAMPOS ---
+        const camposPacienteIds = [
+            'paciente_nombre', 'paciente_nacimiento', 'paciente_genero', 
+            'paciente_celular', 'paciente_email', 'paciente_os', 'paciente_os_sec'
+        ];
+        // MODIFICADO v3: Añadidos campos de contacto
+        const camposMedicoIds = [
+            'solicitante_nombre', 'solicitante_especialidad', 'solicitante_institucion', 
+            'solicitante_celular', 'solicitante_email'
+        ];
+
+        function setCamposPaciente(habilitado, data = {}) {
+            camposPacienteIds.forEach(id => {
+                const campo = document.getElementById(id);
+                if (campo.tagName === 'SELECT') {
+                    campo.disabled = !habilitado;
+                } else {
+                    campo.readOnly = !habilitado;
+                }
+                
+                if (habilitado) {
+                    campo.classList.remove('bg-gray-100');
+                    campo.value = data[id] || '';
+                } else {
+                    campo.classList.add('bg-gray-100');
+                    campo.value = data[id] || '';
+                }
+            });
+        }
+        
+        function setCamposMedico(habilitado, data = {}) {
+            camposMedicoIds.forEach(id => {
+                const campo = document.getElementById(id);
+                campo.readOnly = !habilitado;
+                if (habilitado) {
+                    campo.classList.remove('bg-gray-100');
+                    campo.value = data[id] || '';
+                } else {
+                    campo.classList.add('bg-gray-100');
+                    campo.value = data[id] || '';
+                }
+            });
+        }
+
+
+        // Asegurarse de que el panel de control se muestre al cargar
+        window.onload = function() {
+            mostrarSeccion('seccion-dashboard');
+            
+            // Setea la fecha de recepción por defecto
+            setHoy('fecha_recepcion');
+
+            // --- ASIGNACIÓN DE LISTENERS (SEGURO) ---
+
+            // --- SCRIPT DE LOGIN (MODAL) ---
+            const loginModal = document.getElementById('seccion-login');
+            const openLoginButton = document.getElementById('open-login-button');
+            const closeLoginButton = document.getElementById('close-login-button');
+            const loginForm = document.getElementById('login-form');
+            const loginToRegisterButton = document.getElementById('login-to-register-button');
+
+            if(openLoginButton && loginModal) {
+                openLoginButton.addEventListener('click', function() {
+                    loginModal.style.display = 'flex';
+                });
+            }
+            if(closeLoginButton && loginModal) {
+                closeLoginButton.addEventListener('click', function() {
+                    loginModal.style.display = 'none';
+                });
+            }
+            if(loginToRegisterButton && loginModal) {
+                loginToRegisterButton.addEventListener('click', function() {
+                    loginModal.style.display = 'none'; // Oculta el login
+                    mostrarSeccion('seccion-registro'); // Muestra la sección de registro
+                });
+            
+            }
+            if(loginForm && loginModal) {
+                loginForm.addEventListener('submit', function(e) {
+                    e.preventDefault(); 
+                    loginModal.style.display = 'none';
+                    mostrarNotificacion('✓ Sesión iniciada correctamente.', 'exito');
+                });
+            }
+
+            // --- SCRIPT PARA TABLA DINÁMICA DE PRÁCTICAS ---
+            const btnAnadirPractica = document.getElementById('btn-anadir-practica');
+            const tablaPracticasBody = document.getElementById('tabla-practicas-body');
+
+            if(btnAnadirPractica && tablaPracticasBody) {
+                btnAnadirPractica.addEventListener('click', function() {
+                    const newRowHtml = `
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-2 px-4 border-b"><input type="text" placeholder="Código" class="w-full px-2 py-1 border border-gray-300 rounded-md"></td>
+                            <td class="py-2 px-4 border-b"><input type="text" placeholder="Descripción" class="w-full px-2 py-1 border border-gray-300 rounded-md"></td>
+                            <td class="py-2 px-4 border-b"><input type="text" placeholder="Muestra" class="w-full px-2 py-1 border-gray-300 rounded-md"></td>
+                            <td class="py-2 px-4 border-b"><input type="text" placeholder="Comentario..." class="w-full px-2 py-1 border border-gray-300 rounded-md"></td>
+                            <td class="py-2 px-4 border-b text-center">
+                                <button type="button" onclick="eliminarFila(this)" class="bg-red-500 hover:bg-red-600 text-white font-bold px-3 py-1 text-xs rounded-full shadow-md">X</button>
+                            </td>
+                        </tr>
+                    `;
+                    tablaPracticasBody.insertAdjacentHTML('beforeend', newRowHtml);
+                });
+            }
+
+            // --- SCRIPT PARA BÚSQUEDA INTELIGENTE DE PACIENTE (MODIFICADO) ---
+            const btnBuscarPaciente = document.getElementById('btn_buscar_paciente');
+            const dniSearch = document.getElementById('dni_search');
+
+            if(btnBuscarPaciente && dniSearch) {
+                btnBuscarPaciente.addEventListener('click', function() {
+                    const dni = dniSearch.value;
+                    
+                    // --- SIMULACIÓN DE BÚSQUEDA ---
+                    if (dni === '123456') { // Paciente ENCONTRADO (Simulación)
+                        const datosEncontrados = {
+                            'paciente_nombre': 'Juan Pérez (Autocompletado)',
+                            'paciente_nacimiento': '1980-05-10',
+                            'paciente_genero': 'masculino',
+                            'paciente_celular': '343-4567890',
+                            'paciente_email': 'juan.perez@mail.com',
+                            'paciente_os': 'OSDE (Autocompletado)',
+                            'paciente_os_sec': 'IAPSER (Autocompletado)'
+                        };
+                        setCamposPaciente(false, datosEncontrados); // deshabilita y rellena
+                        mostrarNotificacion('✓ Paciente encontrado.', 'exito');
+                    } else if (dni) { // Paciente NO encontrado (Simulación)
+                        setCamposPaciente(true); // habilita y limpia
+                        mostrarNotificacion('i Paciente no encontrado. Ingrese los datos manualmente.', 'info');
+                        document.getElementById('paciente_nombre').focus(); // Pone el cursor en el campo de nombre
+                    } else { // Sin DNI
+                        mostrarNotificacion('✗ Ingrese un DNI para buscar.', 'error');
+                    }
+                });
+            }
+
+            // --- SCRIPT PARA BÚSQUEDA INTELIGENTE DE MÉDICO (MODIFICADO v3) ---
+            const btnBuscarMedico = document.getElementById('btn_buscar_medico');
+            const mpSearch = document.getElementById('medico_mp_search');
+
+            if(btnBuscarMedico && mpSearch) {
+                btnBuscarMedico.addEventListener('click', function() {
+                    const mp = mpSearch.value;
+                    
+                    // --- SIMULACIÓN DE BÚSQUEDA ---
+                    if (mp === 'MP123') { // Médico ENCONTRADO (Simulación)
+                        const datosEncontrados = {
+                            'solicitante_nombre': 'Dr. Carlos Ruiz (Autocompletado)',
+                            'solicitante_especialidad': 'Cardiología',
+                            'solicitante_institucion': 'Consultorio San Martín',
+                            'solicitante_celular': '11-3333-4444',
+                            'solicitante_email': 'c.ruiz@mail.com'
+                        };
+                        setCamposMedico(false, datosEncontrados); // deshabilita y rellena
+                        mostrarNotificacion('✓ Médico Solicitante encontrado.', 'exito');
+                    } else if (mp) { // Médico NO encontrado (Simulación)
+                        setCamposMedico(true); // habilita y limpia
+                        mostrarNotificacion('i Médico no encontrado. Ingrese los datos manualmente.', 'info');
+                        document.getElementById('solicitante_nombre').focus();
+                    } else { // Sin MP
+                        mostrarNotificacion('✗ Ingrese una Matrícula para buscar.', 'error');
+                    }
+                }); // <--- ¡AQUÍ ESTABA EL ERROR! Faltaba cerrar el addEventListener.
+            }
+
+            // --- SCRIPT FILTRO NOMENCLADOR (NUEVO v3) ---
+            const searchNomenclador = document.getElementById('search_nomenclador');
+            const tablaNomencladorBody = document.getElementById('tabla_nomenclador_body');
+
+            if(searchNomenclador && tablaNomencladorBody) {
+                searchNomenclador.addEventListener('keyup', function() {
+                    const filtro = this.value.toLowerCase();
+                    const filas = tablaNomencladorBody.getElementsByTagName('tr');
+                    
+                    for (let i = 0; i < filas.length; i++) {
+                        // Columna 0 (Código), Columna 1 (Descripción)
+                        const celdaCodigo = filas[i].getElementsByTagName('td')[0];
+                        const celdaDesc = filas[i].getElementsByTagName('td')[1];
+                        
+                        if (celdaCodigo && celdaDesc) {
+                            // FIX: Añadimos .trim() para limpiar espacios en blanco antes de comparar
+                            const textoCodigo = (celdaCodigo.textContent || celdaCodigo.innerText).trim();
+                            const textoDesc = (celdaDesc.textContent || celdaDesc.innerText).trim();
+                            
+                            if (textoCodigo.toLowerCase().indexOf(filtro) > -1 || textoDesc.toLowerCase().indexOf(filtro) > -1) {
+                                filas[i].style.display = "";
+                            } else {
+                                filas[i].style.display = "none";
+                            }
+                        }
+                    }
+                });
+            }
+
+
+            // --- Script para campo condicional en registro de profesional ---
+            const tipoProfesional = document.getElementById('reg-prof-tipo');
+            const campoInstitucion = document.getElementById('campo-institucion');
+
+            if(tipoProfesional && campoInstitucion) {
+                tipoProfesional.addEventListener('change', function() {
+                    if (this.value === 'solicitante') {
+                        campoInstitucion.style.display = 'block';
+                    } else {
+                        campoInstitucion.style.display = 'none';
+                    }
+                });
+            }
+
+
+            // --- SIMULACIÓN DE ÉXITO EN FORMULARIOS ---
+
+            // Simulación para Carga de Informe
+            const formCarga = document.getElementById('form-carga-informe');
+            if(formCarga) {
+                formCarga.addEventListener('submit', function(e) {
+                    e.preventDefault(); // Evita que se recargue la página
+                    mostrarNotificacion('✓ Informe guardado como Borrador.', 'exito');
+                    // Idealmente, aquí también se resetearía el formulario
+                });
+            }
+
+            // Simulación para Registro de Paciente
+            const formRegPaciente = document.getElementById('form-registro-paciente');
+            if(formRegPaciente) {
+                formRegPaciente.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    mostrarNotificacion('✓ Paciente registrado con éxito.', 'exito');
+                    mostrarSeccion('seccion-dashboard'); // Vuelve al inicio
+                });
+            }
+
+            // Simulación para Registro de Profesional
+            const formRegProfesional = document.getElementById('form-registro-profesional');
+            if(formRegProfesional) {
+                formRegProfesional.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    mostrarNotificacion('✓ Profesional registrado con éxito.', 'exito');
+                    mostrarSeccion('seccion-dashboard'); // Vuelve al inicio
+                });
+            }
+
+            // Simulación para Carga de Resultados (Bioquímico)
+            const formCargaResultados = document.getElementById('form-carga-resultados');
+            if(formCargaResultados) {
+                formCargaResultados.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    mostrarNotificacion('✓ Informe 10234 Publicado con éxito.', 'exito');
+                    mostrarSeccion('seccion-busqueda'); // Vuelve a la búsqueda
+                });
+            }
+
+            const btnGuardarParcial = document.getElementById('btn-guardar-parcial');
+            if(btnGuardarParcial) {
+                btnGuardarParcial.addEventListener('click', function() {
+                    mostrarNotificacion('✓ Cambios guardados parcialmente.', 'info');
+                });
+            }
+            
+            // --- ENLACES DEL FOOTER ---
+            // Esto se maneja con `onclick="mostrarSeccion('...')"` en el HTML del footer.
+            // No se necesita JS adicional aquí.
+
+        };
+
+    </script>
 
 </body>
 </html>
-
 
